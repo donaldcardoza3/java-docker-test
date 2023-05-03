@@ -43,4 +43,4 @@ deploy:
     - docker
   script:
     - docker pull $CONTAINER_RELEASE_IMAGE
-    - docker run -i  -p 127.0.0.1:8080:8080 $CONTAINER_RELEASE_IMAGE
+    - docker run -i -d -p 127.0.0.1:8080:8080 $CONTAINER_RELEASE_IMAGE
