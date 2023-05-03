@@ -1,0 +1,46 @@
+image: docker
+services:
+  - docker:dind
+
+stages: 
+  - build
+  - release
+  - deploy
+
+
+
+variables:
+   
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
+
+before_script:
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+
+
+build-docker-image:
+  stage: build
+  script:
+    
+    - docker build -t $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
+
+
+
+
+release-image:
+  stage: release
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker tag $CONTAINER_TEST_IMAGE $CONTAINER_RELEASE_IMAGE
+    - docker push $CONTAINER_RELEASE_IMAGE
+  
+
+deploy:
+  stage: deploy
+  tags:
+    - docker
+  script:
+    - docker pull $CONTAINER_RELEASE_IMAGE
+    - docker run -d -p 80:8080 $CONTAINER_RELEASE_IMAGE
